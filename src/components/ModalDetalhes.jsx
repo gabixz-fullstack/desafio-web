@@ -1,6 +1,11 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+
+const CAMPOS_EXTRAS = ["subregion"]; // campos que não cabem nos 10 do fetch da lista — buscados sob demanda ao abrir o modal
 
 export function ModalDetalhes({ isOpen, onClose, pais }) {
+  const [extras, setExtras] = useState(null);
+  const [carregandoExtras, setCarregandoExtras] = useState(false);
+
   const detalhes = !pais
     ? null
     : {
@@ -12,7 +17,7 @@ export function ModalDetalhes({ isOpen, onClose, pais }) {
         continente: Array.isArray(pais.continente)
           ? pais.continente.join(", ")
           : pais.continente || "",
-        subRegiao: pais.subRegiao || "",
+        subRegiao: pais.subRegiao || extras?.subregion || "",
         populacao: pais.populacao || 0,
         areaTerritorial: pais.areaTerritorial || 0,
         idiomas: pais.idiomas || [],
@@ -27,7 +32,37 @@ export function ModalDetalhes({ isOpen, onClose, pais }) {
           : pais.dominioInternet || "",
         bandeiraUrl: pais.bandeiraUrl || "",
         bandeiraEmoji: pais.bandeiraEmoji || pais.flag || "",
+        linkMaps: pais.linkMaps || "",
       };
+
+  useEffect(() => {
+    if (!isOpen || !pais?.nome) {
+      setExtras(null);
+      return;
+    }
+
+    const controller = new AbortController();
+    setCarregandoExtras(true);
+
+    fetch(
+      `https://restcountries.com/v3.1/name/${encodeURIComponent(pais.nome)}?fullText=true&fields=${CAMPOS_EXTRAS.join(",")}`,
+      { signal: controller.signal },
+    )
+      .then(async (res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const body = await res.json();
+        if (!Array.isArray(body) || !body[0]) throw new Error("sem dados");
+        setExtras(body[0]);
+      })
+      .catch((err) => {
+        if (err.name !== "AbortError") {
+          console.error("Erro ao buscar detalhes do país:", err);
+        }
+      })
+      .finally(() => setCarregandoExtras(false));
+
+    return () => controller.abort();
+  }, [isOpen, pais?.nome]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -102,7 +137,9 @@ export function ModalDetalhes({ isOpen, onClose, pais }) {
               </div>
               <div className="modal-item">
                 <span className="modal-label">Sub-região</span>
-                <span className="modal-value">{detalhes.subRegiao || "—"}</span>
+                <span className="modal-value">
+                  {detalhes.subRegiao || (carregandoExtras ? "Carregando..." : "—")}
+                </span>
               </div>
               <div className="modal-item">
                 <span className="modal-label">Área territorial</span>
