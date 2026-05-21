@@ -1,0 +1,275 @@
+body {
+  margin: 0;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top, rgba(170, 59, 255, 0.12), transparent 28%),
+    linear-gradient(180deg, #f7f7fb 0%, #ffffff 100%);
+}
+
+@media (prefers-color-scheme: dark) {
+  body {
+    background:
+      radial-gradient(circle at top, rgba(170, 59, 255, 0.08), transparent 28%),
+      linear-gradient(180deg, #0f0f14 0%, #16171d 100%);
+  }
+}
+
+#root {
+  width: 100%;
+  min-height: 100svh;
+  border: 0;
+  display: block;
+}
+
+/* ── Layout ── */
+
+.app-shell {
+  width: min(1120px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 48px 0 56px;
+  text-align: left;
+}
+
+.app-header {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.app-header p {
+  max-width: 52ch;
+  color: var(--text);
+}
+
+/* ── Busca ── */
+
+.search-bar {
+  position: sticky;
+  top: 16px;
+  z-index: 2;
+  margin-bottom: 28px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter: blur(14px);
+  box-shadow: var(--shadow);
+}
+
+.search-input {
+  width: 100%;
+  box-sizing: border-box;
+  border: 0;
+  outline: 0;
+  padding: 16px 18px;
+  border-radius: 12px;
+  background: var(--bg);
+  color: var(--text-h);
+  font: inherit;
+}
+
+.search-input::placeholder {
+  color: var(--text);
+}
+
+.search-input:focus {
+  box-shadow: inset 0 0 0 1px var(--accent-border);
+}
+
+.results-state {
+  margin: 24px 0 0;
+  color: var(--text);
+}
+
+/* ── Grid de países ── */
+
+.countries-section {
+  margin-top: 8px;
+}
+
+.countries-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 18px;
+}
+
+.country-card {
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 22px;
+  background: var(--bg);
+  box-shadow: var(--shadow);
+  transition: transform 180ms ease, border-color 180ms ease;
+  cursor: pointer;
+}
+
+.country-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent-border);
+}
+
+.country-flag {
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+  display: block;
+  background: var(--border);
+}
+
+.country-content {
+  padding: 18px;
+}
+
+.country-content h2 {
+  margin-bottom: 14px;
+  font-size: 22px;
+}
+
+.country-details {
+  display: grid;
+  gap: 10px;
+}
+
+.country-details p {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 15px;
+  color: var(--text);
+}
+
+.country-details span {
+  color: var(--text-h);
+  font-weight: 600;
+}
+
+@media (max-width: 640px) {
+  .app-shell {
+    width: min(100%, calc(100% - 20px));
+    padding: 20px 0 28px;
+  }
+
+  .search-bar {
+    top: 10px;
+    padding: 10px;
+  }
+
+  .countries-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .country-details p {
+    flex-direction: column;
+    gap: 4px;
+  }
+}
+
+/* ── Modal ── */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: color-mix(in srgb, var(--text-h) 35%, transparent);
+  z-index: 50;
+}
+
+.modal-content {
+  width: min(720px, 100%);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  text-align: left;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 16px 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.modal-title {
+  margin: 0;
+}
+
+.modal-close {
+  appearance: none;
+  border: 1px solid var(--accent-border);
+  background: var(--accent-bg);
+  color: var(--text-h);
+  border-radius: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font: inherit;
+
+  &:hover {
+    border-color: var(--accent);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+}
+
+.modal-body {
+  padding: 16px;
+  display: grid;
+  gap: 16px;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.modal-flag {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  min-height: 40px;
+}
+
+.modal-flag img {
+  max-width: 160px;
+  height: auto;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+
+.modal-list {
+  display: grid;
+  gap: 10px;
+}
+
+.modal-item {
+  display: grid;
+  gap: 2px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+
+  &:last-child {
+    padding-bottom: 0;
+    border-bottom: 0;
+  }
+}
+
+.modal-label {
+  font-family: var(--mono);
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.2;
+}
+
+.modal-value {
+  color: var(--text-h);
+  word-break: break-word;
+}
+
+.modal-empty {
+  padding: 16px;
+  color: var(--text);
+}

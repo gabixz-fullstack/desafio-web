@@ -1,49 +1,67 @@
-import { useState, useEffect } from 'react';
-import Estatisticas from './componentes/estatisticas';
-import { buscarPaises } from './services/countryService';
-import { carregarFavoritos, salvarFavoritos } from './utils/favoritesStorage';
+import { useEffect, useState } from "react";
+import Buscar from "./equipe1/Buscar";
+import { ModalDetalhes } from "./components/ModalDetalhes.jsx";
+import "./App.css";
 
-export default function App() {
-  const [todosPaises, setTodosPaises] = useState([]);
-  const [paisesNaTela, setPaisesNaTela] = useState([]);
-  const [favoritos, setFavoritos] = useState([]);
+const FIELDS =
+  "name,flags,capital,region,population,area,languages,currencies,timezones,maps";
 
-  // Buscar países quando o app inicia
+export function App() {
+  const [pesquisa, setPesquisa] = useState("");
+  const [paises, setPaises] = useState([]);
+  const [paisSelecionado, setPaisSelecionado] = useState(null);
+
   useEffect(() => {
-      // usar o serviço que normaliza os dados
-      buscarPaises()
-        .then(data => {
-          setTodosPaises(data);
-          setPaisesNaTela(data);
-        })
-        .catch(err => {
-          console.error('Erro ao buscar países:', err);
-          setTodosPaises([]);
-          setPaisesNaTela([]);
-        });
-
-      // carregar favoritos do armazenamento
-      const favs = carregarFavoritos();
-      setFavoritos(favs);
+    fetch(`https://restcountries.com/v3.1/all?fields=${FIELDS}`)
+      .then((res) => res.json())
+      .then(setPaises);
   }, []);
 
-  // (Mantemos apenas os dados; a UI de busca/lista foi removida)
-
-  // salvar favoritos sempre que mudarem
-  useEffect(() => {
-    salvarFavoritos(favoritos);
-  }, [favoritos]);
+  function selecionarPais(pais) {
+    setPaisSelecionado({
+      nome: pais.name.common,
+      nomeOficial: pais.name.official,
+      capital: pais.capital,
+      continente: pais.region,
+      populacao: pais.population,
+      areaTerritorial: pais.area,
+      idiomas: pais.languages && Object.values(pais.languages),
+      moeda: pais.currencies && Object.values(pais.currencies).map((c) => c.name),
+      fusoHorario: pais.timezones,
+      bandeiraUrl: pais.flags.svg,
+      linkMaps: pais.maps.googleMaps,
+    });
+  }
 
   return (
-    <div style={{ padding: '20px', fontFamily: 'sans-serif' }}>
-      <h1>Meu Projeto de Países</h1>
+    <main className="app-shell">
+      <header className="app-header">
+        <h1>Pesquisa por país</h1>
+      </header>
 
-      <Estatisticas
-        todosPaises={todosPaises}
-        paisesNaTela={paisesNaTela}
-        favoritos={favoritos}
+      <section className="search-bar">
+        <input
+          type="text"
+          placeholder="Pesquisar por país..."
+          value={pesquisa}
+          onChange={(e) => setPesquisa(e.target.value)}
+          className="search-input"
+        />
+      </section>
+
+      <Buscar
+        pesquisa={pesquisa}
+        paises={paises}
+        onSelecionar={selecionarPais}
       />
-      {/* Apenas estatísticas exibidas — lista e busca removidas */}
-    </div>
+
+      <ModalDetalhes
+        isOpen={Boolean(paisSelecionado)}
+        onClose={() => setPaisSelecionado(null)}
+        pais={paisSelecionado}
+      />
+    </main>
   );
 }
+
+export default App;
